@@ -1,0 +1,132 @@
+-- ==========================================
+-- 1. PARENT TABLES (No dependencies)
+-- ==========================================
+
+-- Insert Suppliers (5 rows)
+INSERT INTO suppliers (name, registration_no, contact_person, email, phone, country, address) VALUES
+('Alpha Pharmaceuticals', 'REG-001', 'John Doe', 'john@alphapharma.com', '+254712345678', 'Kenya', 'Industrial Area, Nairobi'),
+('Beta Medical Supplies', 'REG-002', 'Jane Smith', 'jane@betamed.com', '+254722345678', 'Kenya', 'Mombasa Road, Nairobi'),
+('Gamma Healthcare Ltd', 'REG-003', 'Alice Brown', 'alice@gamma.com', '+254733345678', 'Kenya', 'Westlands, Nairobi'),
+('Delta Pharma Distributors', 'REG-004', 'Mark Otieno', 'mark@deltapharma.co.ke', '+254744345678', 'Kenya', 'Kisumu CBD'),
+('Omega Medics', 'REG-005', 'Sarah Wanjiku', 'sarah@omegamedics.com', '+254755345678', 'Kenya', 'Nakuru Town');
+
+-- Insert Drug Categories (5 rows)
+INSERT INTO drug_categories (name, description) VALUES
+('Analgesics', 'Pain relievers and fever reducers'),
+('Antibiotics', 'Medications used to treat bacterial infections'),
+('Antimalarials', 'Medicines used to treat malaria'),
+('Antihypertensives', 'Medications used to treat high blood pressure'),
+('Antidiabetics', 'Medications used to manage diabetes');
+
+-- Insert Warehouse Locations (5 rows)
+INSERT INTO warehouse_locations (warehouse_name, zone, rack, bin, storage_type) VALUES
+('Embakasi Main', 'Zone A', 'Rack 01', 'Bin 01', 'ROOM'),
+('Embakasi Main', 'Zone A', 'Rack 01', 'Bin 02', 'ROOM'),
+('Embakasi Main', 'Cold Room', 'Rack C1', 'Bin C1', 'COLD_CHAIN'),
+('Mombasa Depot', 'Zone B', 'Rack 02', 'Bin 05', 'ROOM'),
+('Kisumu Depot', 'Zone C', 'Rack 03', 'Bin 10', 'ROOM');
+
+-- Insert Health Facilities (5 rows)
+INSERT INTO health_facilities (mfl_code, name, level, facility_type, county, sub_county) VALUES
+('MFL-101', 'Kenyatta National Hospital', 6, 'Hospital', 'Nairobi', 'Langata'),
+('MFL-102', 'Mbagathi County Hospital', 4, 'Hospital', 'Nairobi', 'Kibra'),
+('MFL-103', 'Kangemi Health Centre', 3, 'Health Centre', 'Nairobi', 'Westlands'),
+('MFL-201', 'Coast General Hospital', 5, 'Hospital', 'Mombasa', 'Mvita'),
+('MFL-301', 'Jaramogi Oginga Odinga Teaching Hospital', 5, 'Hospital', 'Kisumu', 'Kisumu Central');
+
+
+-- ==========================================
+-- 2. CATALOGUE TABLE (Depends on Categories)
+-- ==========================================
+
+-- Insert Products (5 rows)
+INSERT INTO products (kemsa_code, generic_name, brand_name, strength, dosage_form, unit_of_measure, pack_size, category_id, storage_condition, is_controlled, reorder_level) VALUES
+('KEM-001', 'Paracetamol', 'Panadol', '500mg', 'tablet', 'box', 100, 1, 'ROOM', FALSE, 50),
+('KEM-002', 'Amoxicillin', 'Amoxil', '250mg', 'capsule', 'box', 50, 2, 'ROOM', FALSE, 30),
+('KEM-003', 'Artemether/Lumefantrine', 'Coartem', '20/120mg', 'tablet', 'pack', 30, 3, 'ROOM', FALSE, 20),
+('KEM-004', 'Amlodipine', 'Norvasc', '5mg', 'tablet', 'box', 30, 4, 'ROOM', FALSE, 25),
+('KEM-005', 'Metformin', 'Glucophage', '500mg', 'tablet', 'box', 60, 5, 'ROOM', FALSE, 40);
+
+
+-- ==========================================
+-- 3. PURCHASING & RECEIVING (Chain of dependencies)
+-- ==========================================
+
+-- Insert Purchase Orders (3 rows)
+INSERT INTO purchase_orders (po_number, supplier_id, order_date, expected_delivery_date, status, created_by) VALUES
+('PO-2026-001', 1, '2026-10-01', '2026-10-05', 'CLOSED', 'Admin'),
+('PO-2026-002', 2, '2026-10-03', '2026-10-08', 'CLOSED', 'Admin'),
+('PO-2026-003', 3, '2026-10-10', '2026-10-15', 'OPEN', 'Admin');
+
+-- Insert Purchase Order Items (5 rows)
+INSERT INTO purchase_order_items (po_id, product_id, quantity_ordered, unit_price) VALUES
+(1, 1, 500, 10.50),
+(1, 2, 300, 25.00),
+(2, 3, 200, 150.00),
+(2, 4, 150, 45.00),
+(3, 5, 400, 12.00);
+
+-- Insert Goods Receipts (2 rows)
+INSERT INTO goods_receipts (grn_number, po_id, delivery_note_no, received_date, received_by, inspected_by, status) VALUES
+('GRN-2026-001', 1, 'DN-9981', '2026-10-05', 'Storekeeper Bob', 'QA Officer Mary', 'APPROVED'),
+('GRN-2026-002', 2, 'DN-5542', '2026-10-08', 'Storekeeper Alice', 'QA Officer Mary', 'APPROVED');
+
+-- Insert Goods Receipt Items (4 rows)
+INSERT INTO goods_receipt_items (grn_id, po_item_id, product_id, batch_number, manufacture_date, expiry_date, quantity_received, quantity_accepted, quantity_rejected) VALUES
+(1, 1, 1, 'BAT-PAR-01', '2026-01-01', '2028-01-01', 500, 500, 0),
+(1, 2, 2, 'BAT-AMX-02', '2026-02-01', '2027-12-31', 300, 300, 0),
+(2, 3, 3, 'BAT-CRT-03', '2026-03-01', '2028-03-01', 200, 200, 0),
+(2, 4, 4, 'BAT-AML-04', '2026-01-15', '2029-01-15', 150, 150, 0);
+
+
+-- ==========================================
+-- 4. INVENTORY / STOCK
+-- ==========================================
+
+-- Insert Stock (4 rows)
+INSERT INTO stock (grn_item_id, product_id, batch_number, expiry_date, location_id, quantity_on_hand) VALUES
+(1, 1, 'BAT-PAR-01', '2028-01-01', 1, 500),
+(2, 2, 'BAT-AMX-02', '2027-12-31', 2, 300),
+(3, 3, 'BAT-CRT-03', '2028-03-01', 3, 200),
+(4, 4, 'BAT-AML-04', '2029-01-15', 4, 150);
+
+
+-- ==========================================
+-- 5. REQUISITIONS & DISPATCHES
+-- ==========================================
+
+-- Insert Requisitions (3 rows)
+INSERT INTO requisitions (requisition_number, facility_id, requested_date, status, approved_by, approved_at) VALUES
+('REQ-2026-001', 1, '2026-10-06', 'DISPATCHED', 'Dr. Kamau', '2026-10-06 10:00:00'),
+('REQ-2026-002', 2, '2026-10-07', 'DISPATCHED', 'Dr. Kamau', '2026-10-07 11:00:00'),
+('REQ-2026-003', 3, '2026-10-09', 'SUBMITTED', NULL, NULL);
+
+-- Insert Requisition Items (4 rows)
+INSERT INTO requisition_items (requisition_id, product_id, quantity_requested, quantity_approved) VALUES
+(1, 1, 100, 100),
+(1, 2, 50, 50),
+(2, 3, 40, 40),
+(3, 4, 30, 30);
+
+-- Insert Dispatches (2 rows)
+INSERT INTO dispatches (dispatch_number, requisition_id, facility_id, dispatch_date, vehicle_reg_no, driver_name, status, delivered_at, received_by) VALUES
+('DISP-2026-001', 1, 1, '2026-10-07', 'KCA 123A', 'James Driver', 'DELIVERED', '2026-10-07 14:00:00', 'Nurse Lucy'),
+('DISP-2026-002', 2, 2, '2026-10-08', 'KCB 456B', 'Peter Driver', 'DELIVERED', '2026-10-08 15:30:00', 'Pharmacist Tom');
+
+-- Insert Dispatch Items (3 rows)
+INSERT INTO dispatch_items (dispatch_id, req_item_id, stock_id, quantity_dispatched) VALUES
+(1, 1, 1, 100),
+(1, 2, 2, 50),
+(2, 3, 3, 40);
+
+
+-- ==========================================
+-- 6. AUDIT LEDGER
+-- ==========================================
+
+-- Insert Stock Movements (4 rows)
+INSERT INTO stock_movements (stock_id, movement_type, quantity, reference_type, reference_id, moved_by, remarks) VALUES
+(1, 'RECEIPT', 500, 'GRN', 1, 'Storekeeper Bob', 'Initial receipt from PO-2026-001'),
+(2, 'RECEIPT', 300, 'GRN', 1, 'Storekeeper Bob', 'Initial receipt from PO-2026-001'),
+(1, 'DISPATCH', -100, 'DISPATCH', 1, 'James Driver', 'Dispatched to Kenyatta National Hospital'),
+(2, 'DISPATCH', -50, 'DISPATCH', 1, 'James Driver', 'Dispatched to Kenyatta National Hospital');
